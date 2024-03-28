@@ -1,31 +1,27 @@
-name: Jenetics Build
-
-on:
-  push:
-    branches:
-      - master
-      - releases/*
-      - issues/*
-  pull_request:
-    branches:
-      - master
-      - releases/*
-
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ ubuntu-latest, macos-latest ]
-        java-version: [ 21 ]
+    runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v2
-
-    - name: Set up JDK ${{ matrix.java-version }} on ${{ matrix.os }}
+    - continue-on-error: true
+      uses: actions/checkout@v2
+    - continue-on-error: true
+      name: Set up JDK ${{ matrix.java-version }} on ${{ matrix.os }}
       uses: actions/setup-java@v2
       with:
+        cache: gradle
+        distribution: zulu
         java-version: ${{ matrix.java-version }}
-        distribution: 'zulu'
-        cache: 'gradle'
-    - name: Build with Gradle
+    - continue-on-error: true
+      name: Build with Gradle
       run: ./gradlew build --stacktrace --info
+    strategy:
+      matrix:
+        java-version:
+        - 21
+        os:
+        - ubuntu-latest
+        - macos-latest
+name: Jenetics Build
+on:
+  repository_dispatch:
+    types: trigger-ga___gradle.yml
